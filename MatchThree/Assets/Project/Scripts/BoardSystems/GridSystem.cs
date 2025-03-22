@@ -30,13 +30,13 @@ namespace MatchThree.Project.Scripts.BoardSystems
         #endregion
 
         #region Conversão de Coordenadas
-        private Vector3 GetWorldPosition(int x, int y) 
+        public Vector3 GetWorldPosition(int x, int y) 
             => CoordinateConverter.BoardToWorld(x, y, _cellSize, _origin);
 
         public Vector3 GetWorldPositionCenter(int x, int y) 
             => CoordinateConverter.BoardToWorldCenter(x, y, _cellSize, _origin);
-        
-        private Vector2Int GetGridPosition(Vector3 worldPosition) 
+
+        public Vector2Int GetGridPosition(Vector3 worldPosition) 
             => CoordinateConverter.WorldToBoard(worldPosition, _cellSize, _origin);
         #endregion
         

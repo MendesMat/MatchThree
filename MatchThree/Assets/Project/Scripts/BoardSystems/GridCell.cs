@@ -1,5 +1,3 @@
-using MatchThree.Project.Scripts.Gems;
-
 namespace MatchThree.Project.Scripts.BoardSystems
 {
     public class GridCell<T>
@@ -16,6 +14,7 @@ namespace MatchThree.Project.Scripts.BoardSystems
             _y = y;
         }
 
+        public T GetValue() => _gem;
         public void SetValue(T gem) => _gem = gem;
     }
 }
