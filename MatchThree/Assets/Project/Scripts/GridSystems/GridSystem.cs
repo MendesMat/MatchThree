@@ -1,9 +1,7 @@
-using MatchThree.Project.Scripts.Core.EventBus;
-using MatchThree.Project.Scripts.Core.EventBus.Events;
 using TMPro;
 using UnityEngine;
 
-namespace MatchThree.Project.Scripts.BoardSystems
+namespace MatchThree.Project.Scripts.GridSystems
 {
     public class GridSystem<T>
     {
@@ -42,7 +40,8 @@ namespace MatchThree.Project.Scripts.BoardSystems
         
         #region Manipulação do Board
         // Valida posicionamento dentro do board
-        private bool IsValidPosition(int x, int y) => x >= 0 && y >= 0 && x < _width && y < _height;
+        public bool IsValidPosition(int x, int y) => x >= 0 && y >= 0 && x < _width && y < _height;
+        public bool IsEmptyPosition(int x, int y) => GetValue(x, y) == null;
         
         // Obter valor da célula do board
         public T GetValue(Vector3 worldPosition)
@@ -65,14 +64,6 @@ namespace MatchThree.Project.Scripts.BoardSystems
         {
             if (!IsValidPosition(x, y)) return;
             _gridCells[x, y] = value;
-            
-            // Publica um evento de mudança de valor
-            EventBus<CellValueChangeEvent<T>>.Publish(new CellValueChangeEvent<T>
-            {
-                X = x,
-                Y = y,
-                Type = value
-            });
         }
         #endregion
         

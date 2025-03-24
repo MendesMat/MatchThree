@@ -270,6 +270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 30857bd4a78143268129ccb8c47f8849, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  inputReader: {fileID: 706513539}
   cellSize: 0.5
   gridWidth: 9
   gridHeight: 9
@@ -281,7 +282,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8c5f13444de9160408b0b962cf1fd1bf, type: 2}
   - {fileID: 11400000, guid: e3b94e3acbd055442aa4f1ce1ebacba5, type: 2}
   - {fileID: 11400000, guid: 1c5e1fd23b921b3469dc5c13f1bf51bb, type: 2}
-  ease: 5
+  ease: 3
+  easeDuration: 0.5
   displayDebug: 0
 --- !u!114 &706513538
 MonoBehaviour:

@@ -8,21 +8,21 @@ namespace MatchThree.Project.Scripts.Core.Input
     public class InputReader : MonoBehaviour
     {
         [SerializeField] private PlayerInput playerInput;
-        private static InputAction _selectAction;
-        private InputAction _fireAction;
+        private InputAction _mouseOverAction;
         
-        public static Vector2 Selected => _selectAction.ReadValue<Vector2>();
+        public Vector2 MousePosition => _mouseOverAction.ReadValue<Vector2>();
 
         private void Awake() => SetupInput();
 
         private void SetupInput()
         {
             if(playerInput == null) return;
-            _selectAction = playerInput.actions["Select"];
-            _fireAction = playerInput.actions["Fire"];
+            _mouseOverAction = playerInput.actions["MouseOver"];
         }
 
-        public void OnFireInput(InputAction.CallbackContext context) 
-            => EventBus<FireInputEvent>.Publish(new FireInputEvent());
+        public void OnFireInput(InputAction.CallbackContext context)
+        {
+            if(context.performed) EventBus<SelectInputEvent>.Publish(new SelectInputEvent());
+        }
     }
 }

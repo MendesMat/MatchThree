@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace MatchThree.Project.Scripts.BoardSystems
+namespace MatchThree.Project.Scripts.GridSystems
 {
     public static class CoordinateConverter
     {
