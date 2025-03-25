@@ -232,6 +232,8 @@ GameObject:
   - component: {fileID: 706513538}
   - component: {fileID: 706513539}
   - component: {fileID: 706513537}
+  - component: {fileID: 706513541}
+  - component: {fileID: 706513540}
   m_Layer: 0
   m_Name: GameGrid
   m_TagString: Untagged
@@ -275,16 +277,9 @@ MonoBehaviour:
   gridWidth: 9
   gridHeight: 9
   origin: {x: -2.5, y: -3, z: 0}
-  gemPrefab: {fileID: 716200900549660873, guid: 29e2e7707aacaa44ca9cb333fa4f8907, type: 3}
-  gemTypes:
-  - {fileID: 11400000, guid: 0930b3ad11754fb43a36b3ff1c09860f, type: 2}
-  - {fileID: 11400000, guid: 0ea8e9646cea5fb42b244258cf2c45d4, type: 2}
-  - {fileID: 11400000, guid: 8c5f13444de9160408b0b962cf1fd1bf, type: 2}
-  - {fileID: 11400000, guid: e3b94e3acbd055442aa4f1ce1ebacba5, type: 2}
-  - {fileID: 11400000, guid: 1c5e1fd23b921b3469dc5c13f1bf51bb, type: 2}
   ease: 3
   easeDuration: 0.5
-  displayDebug: 0
+  displayDebug: 1
 --- !u!114 &706513538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -389,6 +384,37 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerInput: {fileID: 706513538}
+--- !u!114 &706513540
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706513535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1d0bdfaf84a4a7c9c7287235f47d589, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &706513541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 706513535}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5d9d6f9a3f242edb1ee784704706159, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gemPrefab: {fileID: 716200900549660873, guid: 29e2e7707aacaa44ca9cb333fa4f8907, type: 3}
+  gemTypes:
+  - {fileID: 11400000, guid: 0ea8e9646cea5fb42b244258cf2c45d4, type: 2}
+  - {fileID: 11400000, guid: 8c5f13444de9160408b0b962cf1fd1bf, type: 2}
+  - {fileID: 11400000, guid: 1c5e1fd23b921b3469dc5c13f1bf51bb, type: 2}
+  - {fileID: 11400000, guid: 0930b3ad11754fb43a36b3ff1c09860f, type: 2}
+  - {fileID: 11400000, guid: e3b94e3acbd055442aa4f1ce1ebacba5, type: 2}
 --- !u!1 &1908629361
 GameObject:
   m_ObjectHideFlags: 0

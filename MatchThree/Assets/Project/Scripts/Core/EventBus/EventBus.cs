@@ -14,7 +14,7 @@ namespace MatchThree.Project.Scripts.Core.EventBus
         {
             foreach (var binding in Bindings)
             {
-                binding.OnEvent(tEvent); 
+                binding.OnEvent(tEvent);
                 binding.OnEventNoArgs();
             }
         }

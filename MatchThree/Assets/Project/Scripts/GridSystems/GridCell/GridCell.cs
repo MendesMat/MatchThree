@@ -1,4 +1,4 @@
-namespace MatchThree.Project.Scripts.GridSystems
+namespace MatchThree.Project.Scripts.GridSystems.GridCell
 {
     public class GridCell<T>
     {

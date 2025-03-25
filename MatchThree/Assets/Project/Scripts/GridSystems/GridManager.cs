@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
@@ -6,8 +5,8 @@ using MatchThree.Project.Scripts.Core.EventBus;
 using MatchThree.Project.Scripts.Core.EventBus.Events;
 using MatchThree.Project.Scripts.Core.Input;
 using MatchThree.Project.Scripts.Gems;
+using MatchThree.Project.Scripts.GridSystems.GridCell;
 using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace MatchThree.Project.Scripts.GridSystems
 {
@@ -22,9 +21,9 @@ namespace MatchThree.Project.Scripts.GridSystems
         [SerializeField] private int gridHeight;
         [SerializeField] private Vector3 origin = Vector3.zero;
         
-        [Header("Gem Properties")]
-        [SerializeField] private Gem gemPrefab;
-        [SerializeField] private GemSO[] gemTypes;
+        // [Header("Gem Properties")]
+        // [SerializeField] private Gem gemPrefab;
+        // [SerializeField] private GemSO[] gemTypes;
         
         [Header("Animation Properties")]
         [SerializeField] private Ease ease = Ease.OutSine;
@@ -36,9 +35,9 @@ namespace MatchThree.Project.Scripts.GridSystems
         private GridSystem<GridCell<Gem>> _grid;
         private EventBinding<SelectInputEvent> _selectEventBinding;
         private Vector2Int _selectedGem = new Vector2Int(-1, -1); // Inicializa fora da grid para nao selecionar uma gema
-        
 
-        private void Awake() => InitializeGrid();
+
+        private void Start() => InitializeGrid();
 
         private void OnEnable()
         {
@@ -54,7 +53,7 @@ namespace MatchThree.Project.Scripts.GridSystems
             
             if (_grid == null)
             {
-                Debug.Log("Falha ao criar o grid");
+                Debug.Log("Falha ao criar o grid em: InitializeGrid() em GridManager.cs");
                 return;
             }
             
@@ -62,33 +61,12 @@ namespace MatchThree.Project.Scripts.GridSystems
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
-                    CreateGridCell(x, y);
-                }
+                    EventBus<SpawnGridCellEvent>.Publish(new SpawnGridCellEvent(_grid, x, y));
+                } 
             }
         }
-        
-        private void CreateGridCell(int x, int y)
-        {
-            var gem = CreateGem(x, y);
-            var gridCell = new GridCell<Gem>(_grid, x, y);
-            
-            if(gem != null) gridCell.SetCellValue(gem);
-            _grid.SetValue(x, y, gridCell);
-        }
 
-        private Gem CreateGem(int x, int y)
-        {
-            if (gemPrefab == null)
-            {
-                Debug.Log("Prefab de Gem não foi atribuído");
-                return null;
-            }
-            
-            var gem = Instantiate(gemPrefab, _grid.GetWorldPositionCenter(x, y), Quaternion.identity, transform);
-            gem.SetGemType(gemTypes[Random.Range(0, gemTypes.Length)]);
-            return gem;
-        }
-
+        // Chamado através do evento de input
         private void OnSelectGem()
         {
             if (Camera.main == null) return;
@@ -113,6 +91,9 @@ namespace MatchThree.Project.Scripts.GridSystems
         
         private IEnumerator RunGameLoop(Vector2Int gridPositionA, Vector2Int gridPositionB)
         {
+            // A linha abaixo retorna corretamente as coordenadas
+            Debug.Log(gridPositionA + ", " + gridPositionB);
+            
             yield return StartCoroutine(SwapGems(gridPositionA, gridPositionB));
             
             var matches = FindMatches();
@@ -127,9 +108,20 @@ namespace MatchThree.Project.Scripts.GridSystems
 
         private IEnumerator SwapGems(Vector2Int gridPositionA, Vector2Int gridPositionB)
         {
-            var gridCellA = _grid.GetValue(gridPositionA.x, gridPositionA.y);
-            var gridCellB = _grid.GetValue(gridPositionB.x, gridPositionB.y);
+            var gridCellA = _grid.TryGetGridCell(gridPositionA.x, gridPositionA.y);
+            var gridCellB = _grid.TryGetGridCell(gridPositionB.x, gridPositionB.y);
+            
+            // A linha abaixo esta retornando null
+            Debug.Log(_grid.TryGetGridCell(gridPositionA.x, gridPositionA.y).GetCellValue());
+                
+            if (gridCellA == null || gridCellB == null)
+            {
+                Debug.Log("Gema A ou B é nula");
+                yield break;
+            }
+            
             var sequence = DOTween.Sequence();
+            if(sequence == null) yield break;
 
             sequence.Append(gridCellA.GetCellValue().transform
                 .DOLocalMove(_grid.GetWorldPositionCenter(gridPositionB.x, gridPositionB.y), easeDuration)
@@ -142,8 +134,8 @@ namespace MatchThree.Project.Scripts.GridSystems
             // Aguardando a sequência ser completada
             yield return sequence.WaitForCompletion();
            
-            _grid.SetValue(gridPositionA.x, gridPositionA.y, gridCellB);
-            _grid.SetValue(gridPositionB.x, gridPositionB.y, gridCellA);
+            _grid.SetCoordinateValue(gridPositionA.x, gridPositionA.y, gridCellB);
+            _grid.SetCoordinateValue(gridPositionB.x, gridPositionB.y, gridCellA);
         }
         
         private List<Vector2Int> FindMatches()
@@ -155,19 +147,18 @@ namespace MatchThree.Project.Scripts.GridSystems
             {
                 for (int x = 0; x < gridWidth; x++)
                 {
-                    var gemA = _grid.GetValue(x, y);
-                    var gemB = _grid.GetValue(x+1, y);
-                    var gemC = _grid.GetValue(x+2, y);
+                    var gemA = _grid.TryGetGridCell(x, y);
+                    var gemB = _grid.TryGetGridCell(x+1, y);
+                    var gemC = _grid.TryGetGridCell(x+2, y);
                     
                     if(gemA == null || gemB == null || gemC == null) continue;
 
-                    if (gemA.GetCellValue().GetGemType() == gemB.GetCellValue().GetGemType()
-                        && gemB.GetCellValue().GetGemType() == gemC.GetCellValue().GetGemType())
-                    {
-                        matches.Add(new Vector2Int(x, y));
-                        matches.Add(new Vector2Int(x+1, y));
-                        matches.Add(new Vector2Int(x+2, y));
-                    }
+                    if (gemA.GetCellValue().GetGemType() != gemB.GetCellValue().GetGemType()
+                        || gemB.GetCellValue().GetGemType() != gemC.GetCellValue().GetGemType()) continue;
+                    
+                    matches.Add(new Vector2Int(x, y));
+                    matches.Add(new Vector2Int(x+1, y));
+                    matches.Add(new Vector2Int(x+2, y));
                 }
             }
             
@@ -176,19 +167,18 @@ namespace MatchThree.Project.Scripts.GridSystems
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
-                    var gemA = _grid.GetValue(x, y);
-                    var gemB = _grid.GetValue(x, y+1);
-                    var gemC = _grid.GetValue(x, y+2);
+                    var gemA = _grid.TryGetGridCell(x, y);
+                    var gemB = _grid.TryGetGridCell(x, y+1);
+                    var gemC = _grid.TryGetGridCell(x, y+2);
                     
                     if(gemA == null || gemB == null || gemC == null) continue;
 
-                    if (gemA.GetCellValue().GetGemType() == gemB.GetCellValue().GetGemType()
-                        && gemB.GetCellValue().GetGemType() == gemC.GetCellValue().GetGemType())
-                    {
-                        matches.Add(new Vector2Int(x, y));
-                        matches.Add(new Vector2Int(x, y+1));
-                        matches.Add(new Vector2Int(x, y+2));
-                    }
+                    if (gemA.GetCellValue().GetGemType() != gemB.GetCellValue().GetGemType()
+                        || gemB.GetCellValue().GetGemType() != gemC.GetCellValue().GetGemType()) continue;
+                    
+                    matches.Add(new Vector2Int(x, y));
+                    matches.Add(new Vector2Int(x, y+1));
+                    matches.Add(new Vector2Int(x, y+2));
                 }
             }
             
@@ -201,8 +191,8 @@ namespace MatchThree.Project.Scripts.GridSystems
 
             foreach (var match in matches)
             {
-                var gem = _grid.GetValue(match.x, match.y).GetCellValue();
-                _grid.SetValue(match.x, match.y, null);
+                var gem = _grid.TryGetGridCell(match.x, match.y).GetCellValue();
+                _grid.SetCoordinateValue(match.x, match.y, null);
             
                 const float animationDuration = 0.1f;
                 gem.transform.DOPunchScale(Vector3.one * 0.5f, animationDuration, 1, 0.5f);
@@ -220,15 +210,15 @@ namespace MatchThree.Project.Scripts.GridSystems
             for (var x = 0; x < gridWidth; x++) {
                 for (var y = 0; y < gridHeight; y++)
                 {
-                    if (_grid.GetValue(x, y) != null) continue;
+                    if (_grid.TryGetGridCell(x, y) != null) continue;
                     
                     for (var i = y + 1; i < gridHeight; i++)
                     {
-                        if (_grid.GetValue(x, i) == null) continue;
+                        if (_grid.TryGetGridCell(x, i) == null) continue;
                         
-                        var gem = _grid.GetValue(x, i).GetCellValue();
-                        _grid.SetValue(x, y, _grid.GetValue(x, i));
-                        _grid.SetValue(x, i, null);
+                        var gem = _grid.TryGetGridCell(x, i).GetCellValue();
+                        _grid.SetCoordinateValue(x, y, _grid.TryGetGridCell(x, i));
+                        _grid.SetCoordinateValue(x, i, null);
                                 
                         gem.transform
                             .DOLocalMove(_grid.GetWorldPositionCenter(x, y), 0.05f)
@@ -248,9 +238,9 @@ namespace MatchThree.Project.Scripts.GridSystems
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
-                    if(_grid.GetValue(x, y) != null) continue;
+                    if(_grid.TryGetGridCell(x, y) != null) continue;
 
-                    CreateGem(x, y);
+                    //CreateGem(x, y);
                     // Player SFX
                     yield return new WaitForSeconds(0.05f);
                 }
