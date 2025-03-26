@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f3d62218877342feb40820c952786c47, type: 3}
   m_Name: GreenGem
   m_EditorClassIdentifier: 
-  sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
+  sprite: {fileID: 21300000, guid: 4c08edbcba69ced4197e5ee61c1f3b5d, type: 3}
   color: {r: 0, g: 1, b: 0, a: 1}
-  score: 0
+  score: 1

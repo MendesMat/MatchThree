@@ -5,18 +5,17 @@ namespace MatchThree.Project.Scripts.GridSystems
 {
     public class GridSystem<T>
     {
-        [Header("GridCell Properties")] 
-        private readonly float _cellSize;
+        public float CellSize { get; }
         private readonly int _width;
         private readonly int _height;
         
         private readonly Vector2 _origin;
         private readonly T[,] _gridCell;
-        
+
         #region Construtor
         public GridSystem(float cellSize, int width, int height, Vector2 origin, bool debug = false)
         {
-            _cellSize = cellSize;
+            CellSize = cellSize;
             _width = width;
             _height = height;
             _origin = origin;
@@ -25,17 +24,18 @@ namespace MatchThree.Project.Scripts.GridSystems
 
             if(debug) EnableDebug();
         }
+
         #endregion
 
         #region Conversão de Coordenadas
         public Vector2 GetWorldPosition(int x, int y) 
-            => CoordinateConverter.BoardToWorld(x, y, _cellSize, _origin);
+            => CoordinateConverter.BoardToWorld(x, y, CellSize, _origin);
 
         public Vector2 GetWorldPositionCenter(int x, int y) 
-            => CoordinateConverter.BoardToWorldCenter(x, y, _cellSize, _origin);
+            => CoordinateConverter.BoardToWorldCenter(x, y, CellSize, _origin);
 
         public Vector2Int GetGridPosition(Vector2 worldPosition) 
-            => CoordinateConverter.WorldToBoard(worldPosition, _cellSize, _origin);
+            => CoordinateConverter.WorldToBoard(worldPosition, CellSize, _origin);
         #endregion
         
         #region Manipulação do Board

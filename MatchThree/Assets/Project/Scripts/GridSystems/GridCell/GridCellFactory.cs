@@ -27,7 +27,6 @@ namespace MatchThree.Project.Scripts.GridSystems.GridCell
 
         private void GemSetup(SpawnGridCellEvent eventData)
         {
-            Debug.Log("GemSetup");
             var grid = eventData.Grid;
             var x = eventData.X;
             var y = eventData.Y;
@@ -37,7 +36,6 @@ namespace MatchThree.Project.Scripts.GridSystems.GridCell
 
         private void CreateGridCell(SpawnResponseEvent<Gem> eventData)
         {
-            Debug.Log("CreateGridCell");
             var grid = eventData.Grid;
             var gem = eventData.Value;
             var x = eventData.X;

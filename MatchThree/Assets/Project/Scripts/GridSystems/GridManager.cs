@@ -21,10 +21,6 @@ namespace MatchThree.Project.Scripts.GridSystems
         [SerializeField] private int gridHeight;
         [SerializeField] private Vector3 origin = Vector3.zero;
         
-        // [Header("Gem Properties")]
-        // [SerializeField] private Gem gemPrefab;
-        // [SerializeField] private GemSO[] gemTypes;
-        
         [Header("Animation Properties")]
         [SerializeField] private Ease ease = Ease.OutSine;
         [SerializeField] private float easeDuration = 0.5f;
@@ -35,7 +31,6 @@ namespace MatchThree.Project.Scripts.GridSystems
         private GridSystem<GridCell<Gem>> _grid;
         private EventBinding<SelectInputEvent> _selectEventBinding;
         private Vector2Int _selectedGem = new Vector2Int(-1, -1); // Inicializa fora da grid para nao selecionar uma gema
-
 
         private void Start() => InitializeGrid();
 
@@ -65,10 +60,10 @@ namespace MatchThree.Project.Scripts.GridSystems
                 } 
             }
         }
-
-        // Chamado através do evento de input
+        
         private void OnSelectGem()
         {
+            Debug.Log("OnSelectGem");
             if (Camera.main == null) return;
             var selectedCell = Camera.main.ScreenToWorldPoint(inputReader.MousePosition);
             var gridPosition = _grid.GetGridPosition(selectedCell);
@@ -77,24 +72,60 @@ namespace MatchThree.Project.Scripts.GridSystems
                || _grid.IsEmptyPosition(gridPosition.x, gridPosition.y)) return;
 
             // Se selecionar a mesma gema duas vezes, desselecionar
-            if (_selectedGem == gridPosition) DeselectGem();
+            if (_selectedGem == gridPosition)
+            {
+                DeselectGem();
+                return;
+            }
             
             // Se selecionar uma gema e não há outra gema selecionada, selecionar
-            else if (_selectedGem == Vector2Int.one * -1) SelectGem(gridPosition);
+            if (_selectedGem == Vector2Int.one * -1)
+            {
+                SelectGem(gridPosition);
+                return;
+            }
             
-            // Se selecionar duas gemes diferentes, executar lógica
-            else StartCoroutine(RunGameLoop(_selectedGem, gridPosition));
+            if (!IsAdjacent(_selectedGem, gridPosition))
+            {
+                DeselectGem();
+                return;
+            }
+            
+            // Se selecionar duas gemas adjacentes, executar lógica
+            StartCoroutine(RunGameLoop(_selectedGem, gridPosition));
+        }
+        
+        // Compara se as gemas são adjacentes
+        private static bool IsAdjacent(Vector2Int selectedGem, Vector2Int gridPosition)
+        {
+            var difference = selectedGem - gridPosition;
+            
+            var isAdjacent = (Mathf.Abs(difference.x) == 1 && difference.y == 0) 
+                             || (Mathf.Abs(difference.y) == 1 && difference.x == 0);
+
+            return isAdjacent;
         }
 
-        private void SelectGem(Vector2Int gridPosition) => _selectedGem = gridPosition;
-        private void DeselectGem() => _selectedGem = new Vector2Int(-1, -1);
-        
+        private void SelectGem(Vector2Int gridPosition)
+        {
+            Debug.Log("SelectGem");
+            _selectedGem = gridPosition;
+        }
+
+        private void DeselectGem()
+        {
+            Debug.Log("DeselectGem");
+            _selectedGem = new Vector2Int(-1, -1);
+        }
+
         private IEnumerator RunGameLoop(Vector2Int gridPositionA, Vector2Int gridPositionB)
         {
+            Debug.Log("RunGameLoop");
             // A linha abaixo retorna corretamente as coordenadas
             Debug.Log(gridPositionA + ", " + gridPositionB);
             
             yield return StartCoroutine(SwapGems(gridPositionA, gridPositionB));
+            DeselectGem();
             
             var matches = FindMatches();
             yield return StartCoroutine(ExplodeGems(matches));
@@ -102,12 +133,11 @@ namespace MatchThree.Project.Scripts.GridSystems
             yield return StartCoroutine(MakeGemsFall());
 
             yield return StartCoroutine(FillEmptySpots());
-            
-            DeselectGem();
         }
 
         private IEnumerator SwapGems(Vector2Int gridPositionA, Vector2Int gridPositionB)
         {
+            Debug.Log("SwapGems");
             var gridCellA = _grid.TryGetGridCell(gridPositionA.x, gridPositionA.y);
             var gridCellB = _grid.TryGetGridCell(gridPositionB.x, gridPositionB.y);
             
@@ -140,6 +170,7 @@ namespace MatchThree.Project.Scripts.GridSystems
         
         private List<Vector2Int> FindMatches()
         {
+            Debug.Log("FindMatches");
             var matches = new HashSet<Vector2Int>();
             
             // Horinzontal
@@ -187,8 +218,8 @@ namespace MatchThree.Project.Scripts.GridSystems
 
         private IEnumerator ExplodeGems(List<Vector2Int> matches)
         {
+            Debug.Log("ExplodeGems");
             // Evento para tocar SFX
-
             foreach (var match in matches)
             {
                 var gem = _grid.TryGetGridCell(match.x, match.y).GetCellValue();
@@ -205,14 +236,15 @@ namespace MatchThree.Project.Scripts.GridSystems
             }
         }
 
-        private IEnumerator MakeGemsFall() {
-            // TODO: Make this more efficient
-            for (var x = 0; x < gridWidth; x++) {
-                for (var y = 0; y < gridHeight; y++)
+        private IEnumerator MakeGemsFall() 
+        {
+            Debug.Log("MakeGemsFall");
+            for (int x = 0; x < gridWidth; x++) {
+                for (int y = 0; y < gridHeight; y++)
                 {
                     if (_grid.TryGetGridCell(x, y) != null) continue;
                     
-                    for (var i = y + 1; i < gridHeight; i++)
+                    for (int i = y + 1; i < gridHeight; i++)
                     {
                         if (_grid.TryGetGridCell(x, i) == null) continue;
                         
@@ -234,13 +266,14 @@ namespace MatchThree.Project.Scripts.GridSystems
 
         private IEnumerator FillEmptySpots()
         {
+            Debug.Log("FillEmptySpots");
             for (int x = 0; x < gridWidth; x++)
             {
                 for (int y = 0; y < gridHeight; y++)
                 {
                     if(_grid.TryGetGridCell(x, y) != null) continue;
 
-                    //CreateGem(x, y);
+                    EventBus<SpawnGemEvent>.Publish(new SpawnGemEvent(_grid, x, y));
                     // Player SFX
                     yield return new WaitForSeconds(0.05f);
                 }
