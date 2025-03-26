@@ -7,7 +7,7 @@ namespace MatchThree.Project.Scripts.Gems
     public class GemFactory : MonoBehaviour
     {
         [SerializeField] private Gem gemPrefab;
-        [SerializeField] private GemSO[] gemTypes;
+        public GemSO[] gemTypes;
 
         private EventBinding<SpawnGemEvent> _spawnEventBinding;
 
@@ -34,24 +34,7 @@ namespace MatchThree.Project.Scripts.Gems
             var gem = Instantiate(gemPrefab, grid.GetWorldPositionCenter(x, y), Quaternion.identity, transform);
             gem.SetGemType(gemTypes[Random.Range(0, gemTypes.Length)]);
             
-            AdjustGemSize(gem, grid.CellSize);
-            
             EventBus<SpawnResponseEvent<Gem>>.Publish(new SpawnResponseEvent<Gem>(grid, gem, x, y));
-        }
-
-        private static void AdjustGemSize(Gem gem, float cellSize)
-        {
-            var spriteRenderer = gem.GetComponent<SpriteRenderer>();
-            if (spriteRenderer == null)
-            {
-                Debug.Log("GemFactory: SpriteRenderer não encontrado na gema. Impossível ajustar o tamanho.");
-                return;
-            }
-            
-            var spriteSize = spriteRenderer.sprite.bounds.size;
-            var scaleFactor = cellSize / Mathf.Max(spriteSize.x, spriteSize.y);
-            
-            gem.transform.localScale = Vector2.one * scaleFactor;
         }
     }
 }

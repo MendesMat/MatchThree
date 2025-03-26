@@ -7,6 +7,5 @@ namespace MatchThree.Project.Scripts.Gems
     {
         public Sprite sprite;
         public Color color;
-        public int score;
     }
 }
